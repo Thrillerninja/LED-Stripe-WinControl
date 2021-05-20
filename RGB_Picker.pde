@@ -1,5 +1,6 @@
 ColorPicker cp;
 import processing.serial.*;
+import com.logitech.gaming.LogiLED;        //Maus
 Serial port;
 
 //Buttons
@@ -9,12 +10,13 @@ int bx = 00;
 int by = 400;
 int bw = 75;
 int bh = 26;
+color c1;
 
 void setup() 
 {
   size( 500, 500 );
   frameRate( 40 );
-  
+  LogiLED.LogiLedInit();
   cp = new ColorPicker( 10, 10, 400, 400, 255 );  
   port = new Serial(this, Serial.list()[0], 9600);
 }
@@ -23,23 +25,14 @@ void draw ()
 {
   background( 80 );
   cp.render();
-  /*
-  //Buttons
   fill(175);
-  rect(bx,by,bw,bh);                 //Fade  
-  rect(bx+bw+10,by,bw/2-5,bh);        //OFF
-  fill(#FF0000);
-  rect(bx,by+bh+10,bw/2-5,bh);        //R
-  fill(#00FF00); 
-  rect(bx+bw/2+5,by+bh+10,bw/2-5,bh);  //G
-  fill(#0000FF);
-  rect(bx+bw+10,by+bh+10,bw/2-5,bh);   //B
-  */
+  rect(bx+40,by+20,bw-30,20);        //Fade  
+  rect(bx+90,by+20,bw-40,20);        //OFF
   
   fill(0);
   textSize(17);
-  text("Fade", bx+35, bh+411);
-  text("OFF", bx+bw+15, bh+412);
+  text("Fade", bx+42, bh+411);
+  text("OFF", bx+bw+17, bh+411);
   
   //Get color
   color c = get(20, 430);
@@ -47,10 +40,13 @@ void draw ()
   int g  = (int)green(c);
   int b  = (int)blue(c);
   
-  port.write( r + "," + g + "," + b + ">");
-
-  println("<" + r + "," + g + "," + b + ">");
-  
+  if (c!=c1){
+  LogiLED.LogiLedSetLightingForTargetZone(0x3,0,r,g,b);            //Maus
+  LogiLED.LogiLedSetLightingForTargetZone(0x3,1,r,g,b);            //Maus Logo
+  port.write(r + "," + g + "," + b + ">");  
+  println(System.currentTimeMillis()+" <" + r + "," + g + "," + b + ">");  
+  c1 = c;
+  }
   fill(r, g, b);
   noStroke();
 
@@ -61,6 +57,8 @@ void draw ()
   text(g, 20, 40);
   text(b, 20, 50);
   delay(10);
+  
+  //LogiLED.LogiLedShutdown();
 }
 
 
@@ -146,26 +144,21 @@ public class ColorPicker
   {
   image( cpImage, x, y );
     
-  /*if (mouseX > bx && mouseX < bx+bw && mouseY > by && mouseY < by+bh) {    //Fade
-    fade = !fade;
-  }else if (mousePressed && mouseX > bx && mouseX < bx+bw/2-5 && mouseY > by+bh+10 && mouseY < by+bh+bh+10){    //R
-    fill( 255,0,0 );
-    rect( x, y+h+10, 20, 20 );
-  }else if (mousePressed && mouseX > bx+bw/2+5 && mouseX < bx+bx+bw/2-5 && mouseY > by+bh+10 && mouseY < by+bh+bh+10){    //G
-    fill( 0,255,0 );
-    rect( x, y+h+10, 20, 20 );
-  }else if (mousePressed && mouseX > bx+bw+10 && mouseX < bx+bw+10+bw/2-5 && mouseY > by+bh+10 && mouseY < by+bh+bh+10){    //B
-    fill( 0,0,255 );
-    rect( x, y+h+10, 20, 20 );
-  }else if (mousePressed && mouseX > bx+bw+10 && mouseX < bx+bx+bw+10 && mouseY > by && mouseY < by+bh){    //OFF
-    fill( 0,0,0 );
-    rect( x, y+h+10, 20, 20 );
-  }else*/ if(mousePressed && mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < 500/*y + h*/ )
-    {
+  if (mousePressed && mouseX > bx+40 && mouseX < bx+40+bw-30 && mouseY > by+20 && mouseY < by+40) {    //Fade
+    cp.fade();
+  }else if (mousePressed && mouseX > bx+90 && mouseX < bx+90+bw-40 && mouseY > by+20 && mouseY < by+40){    //OFF
+    c = 1;
+  }else if((mousePressed && mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h )||(mousePressed && mouseX >= x && mouseX < x + 120 && mouseY >= by+bh+15 && mouseY < 500/*y + h*/ )){
       c = get( mouseX, mouseY );
     }
     fill( c );
     rect( x, y+h+10, 20, 20 );
-    println(c);
+  }
+  
+  public void fade ()
+  {
+  port.write( 300 + "," + 300 + "," + 300 + ">");
+  println(System.currentTimeMillis()+" < Fade >");
+    
   }
 }

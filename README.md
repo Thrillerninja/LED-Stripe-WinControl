@@ -22,6 +22,6 @@ Installation:
 2.PC  
   -Download Processing  
   -Open the RGB_Picker.pbe file  
-  -Install the Logitech libary ore comment the code out, if you dont use a Logitech Mouse.  
+  -Install the Logitech LogiLED libary or comment the lines mentioning it out, if you dont use a Logitech mouse or don´t want the rgb on your mouse.  
   -Change the Port to the Port of the connected Arduino. 
   -Run the Script 
